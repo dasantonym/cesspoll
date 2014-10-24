@@ -1,0 +1,27 @@
+{
+  "name": "cesspoll",
+  "version": "1.0.0",
+  "description": "Retrieve and save reader comments related to politics and society from major german news sources.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "crawler",
+    "news",
+    "politics",
+    "community"
+  ],
+  "author": "Das Antonym <antonymous@htmhell.de>",
+  "license": "MIT",
+  "dependencies": {
+    "async": "^0.9.0",
+    "basic-auth-connect": "^1.0.0",
+    "crawler": "^0.3.1",
+    "express": "^4.10.0",
+    "iconv": "^2.1.4",
+    "jsdom": "^1.0.3",
+    "kue": "^0.8.9",
+    "mongoose": "^3.8.18"
+  }
+}
