@@ -10,6 +10,13 @@ Uses jsdom to extract posts from the website's homepages and then stores the new
 The resulting mongodb entries can then be further indexed and analysed.
 
 
+## Sources ##
+
+Current news sources are:
+
+* [Spiegel Online](http://www.spiegel.de/)
+
+
 ## Install ##
 
 You need nodejs, redis and mongodb.
