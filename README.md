@@ -25,6 +25,7 @@ Checkout, copy ``config.default.js`` to ``config.js`` and run
 
 ```
 npm install
+bower install
 node app.js
 ```
 

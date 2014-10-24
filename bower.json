@@ -1,0 +1,21 @@
+{
+  "name": "cesspoll",
+  "version": "1.0.0",
+  "homepage": "https://github.com/dasantonym/cesspoll",
+  "authors": [
+    "Das Antonym <null@htmlhell.de>"
+  ],
+  "description": "Retrieve and save reader comments related to politics and society from major german news sources.",
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "https://github.com/jquery/jquery.git#1.8.3"
+  }
+}
