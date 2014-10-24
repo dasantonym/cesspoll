@@ -4,35 +4,39 @@ var kue = require('kue'),
     async = require('async'),
     mongoose = require('mongoose'),
     jobs = kue.createQueue(),
+    crawlerMap = require('./lib/crawler-map'),
+    config = require('./config'),
     app = express();
 
-mongoose.connect('mongodb://localhost:27017/cesspoll');
+mongoose.connect('mongodb://' + config.mongodb.host + ':' + config.mongodb.port + '/' + config.mongodb.dbname);
 mongoose.model('PostModel', require('./lib/models/post').PostModel);
 mongoose.model('CommentModel', require('./lib/models/comment').CommentModel);
 
-app.use(basicAuth('admin', 'dumbasfuck'));
-kue.app.set('title', 'Cesspoll Turd Wrangler');
-app.use(kue.app);
-app.listen(4444);
+if (config.kue.admin.active) {
+    app.use(basicAuth(config.kue.admin.login, config.kue.admin.password));
+    kue.app.set('title', 'Cesspoll Turd Wrangler');
+    app.use(kue.app);
+    app.listen(config.kue.admin.port);
+}
 
 jobs.on('job complete', function (id) {
     kue.Job.get(id, function (err, job) {
         if (err) {
-            return console.log('error getting job on complete', err);
+            return console.log('error getting job on complete', err, job);
         }
         job.remove(function (err) {
             if (err) {
-                console.log('error removing job', err);
+                console.log('error removing job', err, job);
                 return;
             }
-            console.log('removed completed job with type: ' + job.type);
         });
     });
 });
 
 jobs.process('fetchPosts', function (job, done) {
-    var spiegelCrawler = require('./lib/crawlers/spiegel');
-    spiegelCrawler.getPostList(function (err, posts) {
+    console.log('fetching posts from source', job.data.source);
+    var postCount = 0;
+    crawlerMap[job.data.source].getPostList(function (err, posts) {
         async.eachSeries(posts, function (post, next) {
             async.waterfall([
                 function (cb) {
@@ -40,7 +44,7 @@ jobs.process('fetchPosts', function (job, done) {
                 },
                 function (storedPost, cb) {
                     if (!storedPost) {
-                        console.log('create post');
+                        postCount += 1;
                         mongoose.model('PostModel').create(post, cb);
                     } else {
                         cb(null, storedPost);
@@ -50,17 +54,22 @@ jobs.process('fetchPosts', function (job, done) {
                 next(err);
             });
         }, function (err) {
-            jobs.create('fetchComments', { title: 'Fetch new comments', source: 'spiegel' }).save();
+            if (err) {
+                console.log('crawling error', err, job.data.source);
+            }
+            console.log('number of added posts', postCount, job.data.source);
+            jobs.create('fetchComments', { title: 'Fetch new comments', source: job.data.source }).save();
             done(err);
         });
     });
 });
 
 jobs.process('fetchComments', function (job, done) {
+    console.log('fetching comments from source', job.data.source);
+    var commentCount = 0;
     mongoose.model('PostModel').find({}, function (err, posts) {
-        var spiegelCrawler = require('./lib/crawlers/spiegel');
         async.each(posts, function (post, next) {
-            spiegelCrawler.getCommentList(post.threadUrl, function (err, comments) {
+            crawlerMap[job.data.source].getCommentList(post.threadUrl, function (err, comments) {
                 async.each(comments, function (comment, next) {
                     async.waterfall([
                         function (cb) {
@@ -70,8 +79,8 @@ jobs.process('fetchComments', function (job, done) {
                             if (storedComment) {
                                 cb(null);
                             } else {
-                                console.log('create comment');
                                 comment.post_id = post.id;
+                                commentCount += 1;
                                 mongoose.model('CommentModel').create(comment, cb);
                             }
                         }
@@ -84,17 +93,25 @@ jobs.process('fetchComments', function (job, done) {
             });
         }, function (err) {
             if (err) {
-                console.log('crawling error', err);
+                console.log('crawling error', err, job.data.source);
             }
+            console.log('number of added comments', commentCount, job.data.source);
             done(err);
         });
     });
 });
 
+var updateIndex = function () {
+    for (var source in crawlerMap) {
+        jobs.create('fetchPosts', { title: 'Fetch new posts', source: source }).save();
+    }
+};
+
+
+// start digging for turds!!!
+
 setInterval(function () {
-    jobs.create('fetchPosts', { title: 'Fetch new posts' }).save();
-}, 30*60*1000);
+    updateIndex();
+}, config.update_interval*60*1000);
 
-// start that shit up!!!
-
-jobs.create('fetchPosts', { title: 'Fetch new posts' }).save();
+updateIndex();
