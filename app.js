@@ -34,20 +34,24 @@ jobs.on('job complete', function (id) {
 });
 
 jobs.process('fetchPosts', function (job, done) {
+    var jobStart = Date.now();
     console.log('fetching posts from source', job.data.source);
     var postCount = 0;
     crawlerMap[job.data.source].getPostList(function (err, posts) {
+        if (err) {
+            return next(err);
+        }
         async.eachSeries(posts, function (post, next) {
             async.waterfall([
                 function (cb) {
                     mongoose.model('PostModel').findOne({ url: post.url }, cb);
                 },
                 function (storedPost, cb) {
-                    if (!storedPost) {
+                    if (storedPost) {
+                        cb(null, storedPost);
+                    } else {
                         postCount += 1;
                         mongoose.model('PostModel').create(post, cb);
-                    } else {
-                        cb(null, storedPost);
                     }
                 }
             ], function (err) {
@@ -55,9 +59,9 @@ jobs.process('fetchPosts', function (job, done) {
             });
         }, function (err) {
             if (err) {
-                console.log('crawling error', err, job.data.source);
+                console.log('crawling error', err, job.data.source, (Date.now() - jobStart) / 1000);
             }
-            console.log('number of added posts', postCount, job.data.source);
+            console.log('added ' + postCount + ' posts in ' + ((Date.now() - jobStart) / 1000).toFixed(3) + 's for source ' + job.data.source);
             jobs.create('fetchComments', { title: 'Fetch new comments', source: job.data.source }).save();
             done(err);
         });
@@ -65,11 +69,15 @@ jobs.process('fetchPosts', function (job, done) {
 });
 
 jobs.process('fetchComments', function (job, done) {
+    var jobStart = Date.now();
     console.log('fetching comments from source', job.data.source);
     var commentCount = 0;
     mongoose.model('PostModel').find({}, function (err, posts) {
         async.each(posts, function (post, next) {
             crawlerMap[job.data.source].getCommentList(post.threadUrl, function (err, comments) {
+                if (err) {
+                    return next(err);
+                }
                 async.each(comments, function (comment, next) {
                     async.waterfall([
                         function (cb) {
@@ -93,9 +101,9 @@ jobs.process('fetchComments', function (job, done) {
             });
         }, function (err) {
             if (err) {
-                console.log('crawling error', err, job.data.source);
+                console.log('crawling error', err, job.data.source, (Date.now() - jobStart) / 1000);
             }
-            console.log('number of added comments', commentCount, job.data.source);
+            console.log('added ' + commentCount + ' comments in ' + ((Date.now() - jobStart) / 1000).toFixed(3) + 's for source ' + job.data.source);
             done(err);
         });
     });
