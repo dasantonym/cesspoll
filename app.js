@@ -39,7 +39,7 @@ jobs.process('fetchPosts', function (job, done) {
     var postCount = 0;
     crawlerMap[job.data.source].getPostList(function (err, posts) {
         if (err) {
-            return next(err);
+            return done(err);
         }
         async.eachSeries(posts, function (post, next) {
             async.waterfall([
