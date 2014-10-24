@@ -15,6 +15,7 @@ The resulting mongodb entries can then be further indexed and analysed.
 Current news sources are:
 
 * [Spiegel Online](http://www.spiegel.de/)
+* [taz](http://www.taz.de/)
 
 
 ## Install ##
