@@ -32,6 +32,10 @@ node app.js
 
 from the repository root.
 
+## Analysis ##
+
+As an optional basic form of analysis the comments are broken up into basic fragments, whitespace is removed and then the example from the [Hyphen](http://sourceforge.net/projects/hunspell/files/Hyphen/) library together with a [hyphenation dictionary](https://www.openoffice.org/lingucomponent/download_dictionary.html) is used to extract syllables (see config file). The analysis results are then stored in the mondodb and are constantly analysed while updating the index.
+
 
 ## Notes from the author ##
 
