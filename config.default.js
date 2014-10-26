@@ -1,6 +1,7 @@
 module.exports = {
     update_interval: 30, // minutes
-    jsdom_concurrency: 2, // concurrent jsdom processes for each worker
+    job_concurrency: 1, // simultaneous updates
+    jsdom_concurrency: 2, // concurrent jsdom processes for each update worker
     crawlers: [
         'spiegel',
         'taz'
