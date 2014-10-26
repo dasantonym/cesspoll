@@ -3,9 +3,8 @@ var kue = require('kue'),
     basicAuth = require('basic-auth-connect'),
     async = require('async'),
     mongoose = require('mongoose'),
-    jobs = kue.createQueue(),
-    crawlerMap = require('./lib/crawler-map'),
     config = require('./config'),
+    jobs = kue.createQueue(),
     app = express();
 
 mongoose.connect('mongodb://' + config.mongodb.host + ':' + config.mongodb.port + '/' + config.mongodb.dbname);
@@ -34,10 +33,14 @@ jobs.on('job complete', function (id) {
 });
 
 jobs.process('fetchPosts', function (job, done) {
-    var jobStart = Date.now();
+    var jobStart = Date.now(),
+        postCount = 0,
+        crawler = require('./lib/crawler');
+
     console.log('fetching posts from source', job.data.source);
-    var postCount = 0;
-    crawlerMap[job.data.source].getPostList(function (err, posts) {
+
+    crawler.load(job.data.source);
+    crawler.getPostList(function (err, posts) {
         if (err) {
             return done(err);
         }
@@ -69,12 +72,16 @@ jobs.process('fetchPosts', function (job, done) {
 });
 
 jobs.process('fetchComments', function (job, done) {
-    var jobStart = Date.now();
+    var jobStart = Date.now(),
+        commentCount = 0,
+        crawler = require('./lib/crawler');
+
     console.log('fetching comments from source', job.data.source);
-    var commentCount = 0;
-    mongoose.model('PostModel').find({}, function (err, posts) {
+
+    crawler.load(job.data.source);
+    mongoose.model('PostModel').find({ source: job.data.source }, function (err, posts) {
         async.each(posts, function (post, next) {
-            crawlerMap[job.data.source].getCommentList(post.threadUrl, function (err, comments) {
+            crawler.getCommentList(post.threadUrl, function (err, comments) {
                 if (err) {
                     return next(err);
                 }
@@ -110,8 +117,8 @@ jobs.process('fetchComments', function (job, done) {
 });
 
 var updateIndex = function () {
-    for (var source in crawlerMap) {
-        jobs.create('fetchPosts', { title: 'Fetch new posts', source: source }).save();
+    for (var index in config.crawlers) {
+        jobs.create('fetchPosts', { title: 'Fetch new posts', source: config.crawlers[index] }).save();
     }
 };
 

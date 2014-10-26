@@ -31,3 +31,12 @@ node app.js
 ```
 
 from the repository root.
+
+
+## Notes from the author ##
+
+This is a quick and dirty crawler for a future art installation of mine so it is not meant to be a fully optimized super-fancy news crawler or something.
+
+It currently crawls over already crawled pages again and does only pull new articles from the front page as well as comments for already pulled articles.
+
+I tried not to be a too huge pig in terms of dirty architecture but there might still be loads of dodgy stuff going on with this app in "production"...

@@ -1,6 +1,10 @@
 module.exports = {
     update_interval: 30, // minutes
     jsdom_concurrency: 2, // concurrent jsdom processes for each worker
+    crawlers: [
+        'spiegel',
+        'taz'
+    ],
     kue: {
         admin: {
             active: true,
