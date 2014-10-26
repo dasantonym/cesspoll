@@ -39,8 +39,7 @@ jobs.process('fetchPosts', function (job, done) {
 
     console.log('fetching posts from source', job.data.source);
 
-    crawler.load(job.data.source);
-    crawler.getPostList(function (err, posts) {
+    crawler.getPostList(job.data.source, function (err, posts) {
         if (err) {
             return done(err);
         }
@@ -78,10 +77,9 @@ jobs.process('fetchComments', function (job, done) {
 
     console.log('fetching comments from source', job.data.source);
 
-    crawler.load(job.data.source);
     mongoose.model('PostModel').find({ source: job.data.source }, function (err, posts) {
         async.each(posts, function (post, next) {
-            crawler.getCommentList(post.threadUrl, function (err, comments) {
+            crawler.getCommentList(job.data.source, post.threadUrl, function (err, comments) {
                 if (err) {
                     return next(err);
                 }
