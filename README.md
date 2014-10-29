@@ -25,7 +25,7 @@ You need nodejs, redis and mongodb.
 Install with
 
 ```
-npm install https://github.com/dasantonym/cesspoll.git
+npm install git://github.com/dasantonym/node-cesspoll.git
 ```
 
 To run it go to ``example/``, copy ``config.default.js`` to ``config.js`` and run
