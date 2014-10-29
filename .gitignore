@@ -1,6 +1,7 @@
 .idea/*
 node_modules/*
 bower_components/*
-tmp/*
+example/tmp/*
 config.js
+!node_modules/cesspoll
 !.gitkeep

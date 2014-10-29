@@ -3,7 +3,7 @@
 
 ## About ##
 
-Retrieve and save reader comments from major german news sources.
+Node Module to retrieve and save reader comments from major german news sources.
 
 Uses jsdom to extract posts from the website's homepages and then stores the news article and the comments to the article.
 
@@ -22,15 +22,18 @@ Current news sources are:
 
 You need nodejs, redis and mongodb.
 
-Checkout, copy ``config.default.js`` to ``config.js`` and run
+Install with
 
 ```
-npm install
-bower install
+npm install https://github.com/dasantonym/cesspoll.git
+```
+
+To run it go to ``example/``, copy ``config.default.js`` to ``config.js`` and run
+
+```
 node app.js
 ```
 
-from the repository root.
 
 ## Analysis ##
 
@@ -39,8 +42,6 @@ As an optional basic form of analysis the comments are broken up into basic frag
 
 ## Notes from the author ##
 
-This is a quick and dirty crawler for a future art installation of mine so it is not meant to be a fully optimized super-fancy news crawler or something.
+This is a quick and dirty crawler for a specific art installation so it is not meant to be a fully optimized super-fancy news crawler or something.
 
-It currently crawls over already crawled pages again and does only pull new articles from the front page as well as comments for already pulled articles.
-
-I tried not to be a too huge pig in terms of dirty architecture but there might still be loads of dodgy stuff going on with this app in "production"...
+It is not very performant, currently redownloads already crawled pages again and does only pull new articles from the front page as well as comments for already pulled articles.

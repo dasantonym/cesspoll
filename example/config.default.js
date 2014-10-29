@@ -1,14 +1,15 @@
 module.exports = {
     update_delay: 15, // minutes
     job_concurrency: 1, // simultaneous updates
-    jsdom_concurrency: 2, // concurrent jsdom processes for each update worker
+    jsdom_concurrency: 1, // concurrent jsdom processes for each update worker
+    tmp_folder: './tmp',
     crawlers: [
         'spiegel',
         'taz'
     ],
     kue: {
         admin: {
-            active: true,
+            active: false,
             port: 4444,
             login: 'admin',
             password: 'dumb-as-fuck'
